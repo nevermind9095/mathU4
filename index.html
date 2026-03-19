@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小數討伐戰：魔物來襲</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <header id="top-bar">
+            <div class="level-info">關卡：<span id="current-level">1</span> / 3</div>
+            <div class="coin-info">💰 金幣：<span id="coin-count">0</span></div>
+        </header>
+
+        <section id="monster-area">
+            <img id="monster-sprite" src="" alt="魔物">
+            <div id="monster-hp-bar"><div id="hp-fill"></div></div>
+            <div id="math-board" class="math-board">
+                <div id="math-content">題目載入中...</div>
+            </div>
+        </section>
+
+        <section id="action-area">
+            
+            <div id="step-estimate" class="step-box">
+                <h3>【估】破防：這題的答案大約落在哪裡？</h3>
+                <div class="options-container" id="estimate-options"></div>
+            </div>
+
+            <div id="step-arrange" class="step-box hidden">
+                <h3>【排】佈陣：請選擇正確的直式排法</h3>
+                <div class="options-container" id="arrange-options"></div>
+            </div>
+
+            <div id="step-multiply" class="step-box hidden">
+                <h3>【乘】聚氣：當作整數相乘，答案是多少？</h3>
+                <div class="input-group">
+                    <input type="number" id="multiply-input" placeholder="輸入整數">
+                    <button id="btn-multiply">確認</button>
+                </div>
+            </div>
+
+            <div id="step-convert" class="step-box hidden">
+                <h3>【換】詠唱：被乘數和乘數總共是幾位小數？</h3>
+                <div class="options-container" id="convert-options">
+                    <button class="option-btn" data-val="1">1 位小數</button>
+                    <button class="option-btn" data-val="2">2 位小數</button>
+                    <button class="option-btn" data-val="3">3 位小數</button>
+                    <button class="option-btn" data-val="4">4 位小數</button>
+                </div>
+            </div>
+
+            <div id="step-decimal" class="step-box hidden">
+                <h3>【點】攻擊：點上小數點，給予致命一擊！</h3>
+                <div class="input-group">
+                    <input type="number" id="final-input" step="0.001" placeholder="輸入最終答案">
+                    <button id="btn-attack">⚔️ 攻擊！</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="chest-area" class="hidden text-center">
+            <h2>🎉 討伐成功！魔物掉落了寶箱！</h2>
+            <div id="chest-sprite" style="font-size: 100px; cursor: pointer; animation: bounce 2s infinite;">🎁</div>
+            <p id="chest-msg">點擊寶箱開啟</p>
+        </section>
+
+        <button id="btn-ai-help" class="floating-btn">🧚‍♂️ 求救</button>
+
+        <div id="ai-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>🧚‍♂️ AI 小精靈提示</h3>
+                <p id="ai-response">正在呼叫精靈...</p>
+                <button id="btn-close-ai">我知道了！</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
