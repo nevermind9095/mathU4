@@ -1,18 +1,19 @@
 // ==========================================
-// 1. 終極防彈：自動修復與 API 版本校正
+// 1. 終極淨化：自動修復被吃掉的底線
 // ==========================================
 const urlParams = new URLSearchParams(window.location.search);
 let keyFromUrl = urlParams.get('key');
 
 if (keyFromUrl) {
-    // 自動將所有空白、%20 轉回底線，並去除前後空格
-    const cleanKey = keyFromUrl.trim().replace(/\s/g, '_'); 
-    sessionStorage.setItem('gemini_api_key', cleanKey);
+    // 💡 強力修復：將所有空白符號（包括網址編碼後的空格）全部強制換回底線
+    const sanitizedKey = keyFromUrl.trim().replace(/\s/g, '_'); 
+    sessionStorage.setItem('gemini_api_key', sanitizedKey);
+    // 讓網址變乾淨，防止二次報錯
     window.history.replaceState({}, document.title, window.location.pathname);
 }
 
 // ==========================================
-// 2. 遊戲資料庫 (更新第三關：對應教案活動五)
+// 2. 遊戲資料庫 (對應教案活動五：積末位為 0 的特例)
 // ==========================================
 let currentLevel = 1;
 let coins = 0;
@@ -31,17 +32,17 @@ const levelData = {
     },
     3: { 
         monsterImg: "dragon.png", monsterName: "魔龍 🐉", 
-        // 💡 針對教案活動五：積的小數點末幾位是0時的特例探討 [cite: 21, 78]
+        // 💡 配合教案活動五：探討積末位為 0 的例外情形
         qStr: "3.25 × 2.38 = ?", topNum: "3.25", botNum: "2.38",
         estOptions: ["1 ~ 4 之間", "7 ~ 12 之間", "15 ~ 20 之間"], estAns: 1, 
-        mulAns: 77350, decAns: 4, finAns: 7.735 // 答案為 7.7350，末位0省略 
+        mulAns: 77350, decAns: 4, finAns: 7.735 
     }
 };
 
 const steps = ['step-estimate', 'step-arrange', 'step-multiply', 'step-convert', 'step-decimal'];
 
 // ==========================================
-// 3. 核心邏輯：黑板呈現次序進展 [cite: 1, 2, 3, 4]
+// 3. 核心邏輯：黑板與遊戲流程
 // ==========================================
 function updateMathBoard(stepIndex) {
     const board = document.getElementById('math-content');
@@ -53,9 +54,7 @@ function updateMathBoard(stepIndex) {
     else if (stepIndex === 5) board.innerHTML = `<div class="vertical-math">${data.topNum}<br>x ${data.botNum}<br><div class="math-line"></div><span style="color:#ff5252; font-weight:bold;">${data.finAns}</span></div>`;
 }
 
-// ------------------------------------------
-// 初始化與按鈕綁定 (省略部分重複邏輯)
-// ------------------------------------------
+// (音效與初始化邏輯)
 function playSound(t){const c=new(window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);if(t==='correct'){o.frequency.setValueAtTime(600,c.currentTime);g.gain.setValueAtTime(0.1,c.currentTime);o.start();o.stop(c.currentTime+0.1)}if(t==='attack'){o.type='square';o.frequency.setValueAtTime(150,c.currentTime);g.gain.setValueAtTime(0.2,c.currentTime);o.start();o.stop(c.currentTime+0.3)}if(t==='coin'){o.frequency.setValueAtTime(1200,c.currentTime);g.gain.setValueAtTime(0.1,c.currentTime);o.start();o.stop(c.currentTime+0.1)}}
 
 function initGame() {
@@ -76,26 +75,26 @@ document.getElementById('btn-attack').onclick=()=>{if(parseFloat(document.getEle
 
 document.getElementById('chest-sprite').onclick=()=>{const drop=Math.floor(Math.random()*5)+1;document.getElementById('coin-count').innerText=drop;document.getElementById('chest-sprite').innerText="✨💰✨";document.getElementById('chest-msg').innerText=`獲得 ${drop} 枚金幣！`};
 
-// 🧚‍♂️ AI 求救：使用 v1beta 增加相容性
+// 🧚‍♂️ AI 求救小精靈 (強化提示)
 document.getElementById('btn-ai-help').onclick = async () => {
-    const apiKey = window.tempApiKey || sessionStorage.getItem('gemini_api_key');
+    const apiKey = sessionStorage.getItem('gemini_api_key');
     const aiModal = document.getElementById('ai-modal');
     const aiText = document.getElementById('ai-response');
     aiModal.classList.remove('hidden'); aiModal.style.display = 'flex';
     
-    if (!apiKey) { aiText.innerText = "🚨 魔法陣失效，請重新載入連結！"; return; }
+    if (!apiKey) { aiText.innerText = "🚨 魔法陣失效，請重新載入正確連結！"; return; }
 
     aiText.innerText = "精靈思考中... 🔮";
-    const prompt = `你是一個溫柔的數學小助教。現在題目是 ${levelData[currentLevel].qStr}。學生卡在步驟 ${currentStep} (1:估算, 2:直式排法, 3:整數相乘, 4:找小數位數, 5:點小數點)。請給予可愛且有啟發性的繁體中文提示，不要給答案。特別注意：如果是魔龍關卡，引導學生思考積末位為 0 的省略規則。`;
+    const prompt = `你是一個溫柔的數學助教。題目是 ${levelData[currentLevel].qStr}。學生卡在步驟 ${currentStep} (1:估算, 2:直式排法, 3:整數相乘, 4:找小數位數, 5:點小數點)。請給予可愛且有啟發性的繁體中文提示，50字內，不給答案。若是魔龍關卡，引導學生思考積末位為 0 是否可省略。`;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
         });
         const data = await response.json();
         aiText.innerText = data.candidates[0].content.parts[0].text;
-    } catch (e) { aiText.innerText = "💥 連線被魔物干擾！(請確認金鑰正確無空白)"; }
+    } catch (e) { aiText.innerText = "💥 連線被魔物干擾！(請確認金鑰正確且無空白)"; }
 };
 
 document.getElementById('btn-close-ai').onclick = () => { document.getElementById('ai-modal').style.display = 'none'; };
